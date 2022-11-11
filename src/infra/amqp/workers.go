@@ -21,5 +21,6 @@ func (w *Worker) Start(queueName string) {
 
 	for message := range out {
 		log.Print(string(message.Body))
+		message.Ack(false)
 	}
 }
