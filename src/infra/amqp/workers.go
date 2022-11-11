@@ -8,7 +8,9 @@ import (
 
 type Worker struct{}
 
-func (w *Worker) start(queueName string) {
+func (w *Worker) Start(queueName string) {
+	log.Print("Starting Worker")
+
 	rabbitMQ := RabbitMQ{}
 	ch := rabbitMQ.OpenChannel()
 	defer ch.Close()
@@ -18,8 +20,6 @@ func (w *Worker) start(queueName string) {
 	go rabbitMQ.Consume(ch, out, queueName)
 
 	for message := range out {
-		log.Print(message)
+		log.Print(string(message.Body))
 	}
-
-	log.Print("Worker starter")
 }

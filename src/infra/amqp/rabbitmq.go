@@ -20,19 +20,17 @@ const AMQP_URI = "amqp://example:123456@localhost:5672/"
 
 func (r *RabbitMQ) OpenChannel() *amqp.Channel {
 	conn, err := amqp.Dial(AMQP_URI)
-	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
+	failOnError(err, "[RabbitMQ::OpenChannel] Failed to connect to RabbitMQ")
 
 	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
+	failOnError(err, "[RabbitMQ::OpenChannel] Failed to open a channel")
 
 	return ch
 }
 
 func (r *RabbitMQ) Consume(ch *amqp.Channel, out chan amqp.Delivery, queueName string) {
 	_, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
-	failOnError(err, "Failed to declare a queue")
+	failOnError(err, "[RabbitMQ::Consume] Failed to declare a queue")
 
 	messages, err := ch.Consume(
 		queueName,
@@ -43,14 +41,14 @@ func (r *RabbitMQ) Consume(ch *amqp.Channel, out chan amqp.Delivery, queueName s
 		false,
 		nil,
 	)
-	failOnError(err, "Failed to declare a queue")
+	failOnError(err, "[RabbitMQ::Consume] Failed to consume messages")
 
 	for message := range messages {
 		out <- message
 	}
 }
 
-func (r *RabbitMQ) sendMessage(ch *amqp.Channel, message string, queueName string, exchange string) {
+func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message string, queueName string, exchange string) {
 	q, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
 	failOnError(err, "Failed to declare a queue")
 
@@ -67,5 +65,6 @@ func (r *RabbitMQ) sendMessage(ch *amqp.Channel, message string, queueName strin
 			Body:        []byte(message),
 		})
 	failOnError(err, "Failed to publish a message")
+
 	log.Printf("Success publish message in queue: %s", queueName)
 }
