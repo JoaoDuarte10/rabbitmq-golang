@@ -2,6 +2,8 @@ package amqp
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -14,12 +16,12 @@ func failOnError(err error, msg string) {
 	}
 }
 
-type RabbitMQ struct{}
-
-const AMQP_URI = "amqp://example:123456@localhost:5672/"
+type RabbitMQ struct {
+	uri string
+}
 
 func (r *RabbitMQ) OpenChannel() *amqp.Channel {
-	conn, err := amqp.Dial(AMQP_URI)
+	conn, err := amqp.Dial(r.uri)
 	failOnError(err, "[RabbitMQ::OpenChannel] Failed to connect to RabbitMQ")
 
 	ch, err := conn.Channel()
@@ -55,14 +57,17 @@ func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message string, queueName strin
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	body, err := json.Marshal(message)
+	failOnError(err, fmt.Sprintf("[RabbitMQ::SendMessage] Failed to parsed message in json: %s", message))
+
 	err = ch.PublishWithContext(ctx,
 		exchange,
 		q.Name,
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
+			ContentType: "application/json",
+			Body:        body,
 		})
 	failOnError(err, "Failed to publish a message")
 
