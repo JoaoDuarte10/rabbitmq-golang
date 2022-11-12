@@ -8,11 +8,15 @@ import (
 )
 
 func MakeOrderCreateWorker(qtdWorkers int) {
+	db := MakeConnectionDatabse()
+	repository := repository.OrderRepositorySqlite{Db: &db}
+	service := services.OrderCreateService{Repository: &repository}
+
 	queueName := "golang"
-	service := services.OrderCreateService{Repository: &repository.OrderRepositorySqlite{}}
 	rabbitMQ := amqp.RabbitMQ{
 		Uri: "amqp://example:123456@localhost:5672/",
 	}
+
 	worker := &workers.OrderCreateWorker{RabbitMQ: rabbitMQ, Service: service}
 
 	for i := 1; i <= qtdWorkers; i++ {

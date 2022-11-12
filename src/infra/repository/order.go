@@ -11,16 +11,12 @@ type OrderRepository interface {
 	Get() ([]order.OrderDto, error)
 }
 
-type OrderRepositorySqlite struct{}
+type OrderRepositorySqlite struct {
+	Db *sql.DB
+}
 
 func (o *OrderRepositorySqlite) Save(order order.OrderDto) error {
-	db, err := sql.Open("sqlite3", "./order.db")
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	stmt, err := db.Prepare("INSERT INTO orders(name, price, date) VALUES(?, ?, ?)")
+	stmt, err := o.Db.Prepare("INSERT INTO orders(name, price, date) VALUES(?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -28,19 +24,15 @@ func (o *OrderRepositorySqlite) Save(order order.OrderDto) error {
 	if _, err := stmt.Exec(order.Name, order.Price, order.Date); err != nil {
 		return err
 	}
+
+	defer o.Db.Close()
 	return nil
 }
 
 func (o *OrderRepositorySqlite) Get() ([]order.OrderDto, error) {
-	db, err := sql.Open("sqlite3", "./order.db")
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
-
 	result := []order.OrderDto{}
 
-	rows, err := db.Query("SELECT * FROM orders")
+	rows, err := o.Db.Query("SELECT * FROM orders")
 	if err != nil {
 		log.Printf("Failed to get orders: %s", err)
 		return nil, err
@@ -53,6 +45,8 @@ func (o *OrderRepositorySqlite) Get() ([]order.OrderDto, error) {
 		}
 		result = append(result, order)
 	}
+
+	defer o.Db.Close()
 
 	return result, nil
 }
