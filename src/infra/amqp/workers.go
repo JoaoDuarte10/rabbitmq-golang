@@ -12,7 +12,7 @@ func (w *Worker) Start(queueName string) {
 	log.Print("Starting Worker...")
 
 	rabbitMQ := RabbitMQ{
-		uri: "amqp://example:123456@localhost:5672/",
+		Uri: "amqp://example:123456@localhost:5672/",
 	}
 	ch := rabbitMQ.OpenChannel()
 	defer ch.Close()

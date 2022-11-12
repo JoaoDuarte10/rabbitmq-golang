@@ -17,11 +17,11 @@ func failOnError(err error, msg string) {
 }
 
 type RabbitMQ struct {
-	uri string
+	Uri string
 }
 
 func (r *RabbitMQ) OpenChannel() *amqp.Channel {
-	conn, err := amqp.Dial(r.uri)
+	conn, err := amqp.Dial(r.Uri)
 	failOnError(err, "[RabbitMQ::OpenChannel] Failed to connect to RabbitMQ")
 
 	ch, err := conn.Channel()
@@ -50,7 +50,7 @@ func (r *RabbitMQ) Consume(ch *amqp.Channel, out chan amqp.Delivery, queueName s
 	}
 }
 
-func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message string, queueName string, exchange string) {
+func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message string, queueName string, exchange string) error {
 	q, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
 	failOnError(err, "Failed to declare a queue")
 
@@ -69,7 +69,11 @@ func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message string, queueName strin
 			ContentType: "application/json",
 			Body:        body,
 		})
-	failOnError(err, "Failed to publish a message")
+	if err != nil {
+		failOnError(err, "Failed to publish a message")
+		return err
+	}
 
 	log.Printf("Success publish message in queue: %s", queueName)
+	return nil
 }
