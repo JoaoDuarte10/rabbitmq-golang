@@ -7,6 +7,7 @@ import (
 
 type Controller interface {
 	CreateOrder(w http.ResponseWriter, r *http.Request)
+	FetchOrders(w http.ResponseWriter, r *http.Request)
 }
 
 type ControllerAdapter struct {

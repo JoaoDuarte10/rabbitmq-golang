@@ -19,6 +19,13 @@ func (r *Router) Init() *http.ServeMux {
 			w.WriteHeader(404)
 		}
 	}))
+	router.Handle("/orders", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if r.ValidateMethod(req, http.MethodGet) {
+			r.controller.FetchOrders(w, req)
+		} else {
+			w.WriteHeader(404)
+		}
+	}))
 	return router
 }
 

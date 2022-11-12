@@ -7,4 +7,5 @@ import (
 type OrderService interface {
 	CreateOrderEvent(message order.OrderDto) error
 	CreateOrder(message order.OrderDto) error
+	GetOrders() []order.OrderDto
 }
