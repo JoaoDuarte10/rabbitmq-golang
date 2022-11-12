@@ -1,22 +1,13 @@
 package services
 
 import (
-	"rabbitmq-golang/src/infra/amqp"
-	"rabbitmq-golang/src/infra/http/dto"
+	"log"
+	"rabbitmq-golang/src/domain/order"
 )
 
-type OrderServiceAdapter struct {
-	RabbitMQ *amqp.RabbitMQ
-}
+type OrderCreateService struct{}
 
-func (o *OrderServiceAdapter) CreateOrderEvent(message dto.OrderDto) error {
-	channel := o.RabbitMQ.OpenChannel()
-	defer channel.Close()
-
-	err := o.RabbitMQ.SendMessage(channel, message, "golang", "")
-	if err != nil {
-		return err
-	}
-
+func (o *OrderCreateService) CreateOrder(order order.OrderDto) error {
+	log.Print("Service")
 	return nil
 }

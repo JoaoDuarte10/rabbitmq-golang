@@ -8,7 +8,7 @@ import (
 func main() {
 	forever := make(chan bool)
 
-	factories.MakeWorker(2)
+	factories.MakeOrderCreateWorker(2)
 	order.StartServer()
 
 	<-forever

@@ -15,9 +15,23 @@ type OrderServer struct {
 	http.Handler
 }
 
+type OrderServiceAdapter struct {
+	*amqp.RabbitMQ
+	*services.OrderCreateService
+	*services.OrderServiceEvent
+}
+
 func MakeOrderServer() *OrderServer {
 	rabbitMQ := amqp.RabbitMQ{Uri: "amqp://example:123456@localhost:5672/"}
-	service := services.OrderServiceAdapter{RabbitMQ: &rabbitMQ}
+	orderCreateEvent := services.OrderServiceEvent{RabbitMQ: &rabbitMQ}
+	orderCreateService := services.OrderCreateService{}
+
+	service := OrderServiceAdapter{
+		RabbitMQ:           &rabbitMQ,
+		OrderCreateService: &orderCreateService,
+		OrderServiceEvent:  &orderCreateEvent,
+	}
+
 	controller := controller.ControllerAdapter{Service: &service}
 
 	server := &OrderServer{Service: &service, Controller: &controller}

@@ -1,7 +1,10 @@
 package services
 
-import "rabbitmq-golang/src/infra/http/dto"
+import (
+	"rabbitmq-golang/src/domain/order"
+)
 
 type OrderService interface {
-	CreateOrderEvent(message dto.OrderDto) error
+	CreateOrderEvent(message order.OrderDto) error
+	CreateOrder(message order.OrderDto) error
 }

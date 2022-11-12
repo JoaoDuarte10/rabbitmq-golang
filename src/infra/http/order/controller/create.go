@@ -5,11 +5,11 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"rabbitmq-golang/src/infra/http/dto"
+	"rabbitmq-golang/src/domain/order"
 )
 
 func (c *ControllerAdapter) CreateOrder(w http.ResponseWriter, r *http.Request) {
-	order := dto.OrderDto{}
+	order := order.OrderDto{}
 
 	body, _ := io.ReadAll(r.Body)
 
