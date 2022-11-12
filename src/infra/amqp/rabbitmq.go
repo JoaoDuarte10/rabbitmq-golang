@@ -50,7 +50,7 @@ func (r *RabbitMQ) Consume(ch *amqp.Channel, out chan amqp.Delivery, queueName s
 	}
 }
 
-func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message string, queueName string, exchange string) error {
+func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message any, queueName string, exchange string) error {
 	q, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
 	failOnError(err, "Failed to declare a queue")
 
