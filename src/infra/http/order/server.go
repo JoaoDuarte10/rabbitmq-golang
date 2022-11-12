@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"rabbitmq-golang/src/infra/amqp"
+	"rabbitmq-golang/src/infra/http/dto"
+	"rabbitmq-golang/src/services"
 )
 
 type OrderService interface {
-	Execute(message OrderDto) error
+	Execute(message dto.OrderDto) error
 }
 
 type OrderServer struct {
@@ -16,30 +17,16 @@ type OrderServer struct {
 	http.Handler
 }
 
-func (o *OrderServer) Execute(message OrderDto) error {
-	rabbitMQ := amqp.RabbitMQ{
-		Uri: "amqp://example:123456@localhost:5672/",
-	}
-	ch := rabbitMQ.OpenChannel()
-	defer ch.Close()
-
-	err := rabbitMQ.SendMessage(ch, message, "golang", "")
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func NewOrderServer() *OrderServer {
-	server := new(OrderServer)
+	service := services.OrderServiceAdapter{}
+	server := OrderServer{Service: &service}
 
 	router := http.NewServeMux()
 	router.Handle("/order", http.HandlerFunc(server.CreateOrder))
 
 	server.Handler = router
 
-	return server
+	return &server
 }
 
 func StartServer() {

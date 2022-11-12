@@ -5,10 +5,11 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"rabbitmq-golang/src/infra/http/dto"
 )
 
 func (o *OrderServer) CreateOrder(w http.ResponseWriter, r *http.Request) {
-	order := OrderDto{}
+	order := dto.OrderDto{}
 
 	body, _ := io.ReadAll(r.Body)
 
@@ -18,7 +19,7 @@ func (o *OrderServer) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 	}
 
-	err = o.Execute(order)
+	err = o.Service.Execute(order)
 	if err != nil {
 		log.Print("Erro no service")
 	}
