@@ -9,7 +9,7 @@ type OrderServiceAdapter struct {
 	RabbitMQ *amqp.RabbitMQ
 }
 
-func (o *OrderServiceAdapter) CreateOrder(message dto.OrderDto) error {
+func (o *OrderServiceAdapter) CreateOrderEvent(message dto.OrderDto) error {
 	channel := o.RabbitMQ.OpenChannel()
 	defer channel.Close()
 

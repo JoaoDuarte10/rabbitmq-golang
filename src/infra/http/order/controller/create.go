@@ -19,7 +19,7 @@ func (c *ControllerAdapter) CreateOrder(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(400)
 	}
 
-	err = c.Service.CreateOrder(order)
+	err = c.Service.CreateOrderEvent(order)
 	if err != nil {
 		log.Print("Erro no service")
 	}
