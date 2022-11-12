@@ -3,12 +3,13 @@ package factories
 import (
 	"rabbitmq-golang/src/infra/amqp"
 	"rabbitmq-golang/src/infra/amqp/workers"
+	"rabbitmq-golang/src/infra/repository"
 	"rabbitmq-golang/src/services"
 )
 
 func MakeOrderCreateWorker(qtdWorkers int) {
 	queueName := "golang"
-	service := services.OrderCreateService{}
+	service := services.OrderCreateService{Repository: &repository.OrderRepositorySqlite{}}
 	rabbitMQ := amqp.RabbitMQ{
 		Uri: "amqp://example:123456@localhost:5672/",
 	}

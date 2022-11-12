@@ -1,7 +1,8 @@
 package order
 
 type OrderDto struct {
-	Name  string
-	Price float64
-	Date  string
+	Id    any     `json:id`
+	Name  string  `json:date`
+	Price float64 `json:price`
+	Date  string  `json:date`
 }
