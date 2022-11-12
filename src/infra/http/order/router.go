@@ -12,6 +12,16 @@ type Router struct {
 
 func (r *Router) Init() *http.ServeMux {
 	router := http.NewServeMux()
-	router.Handle("/order", http.HandlerFunc(r.controller.CreateOrder))
+	router.Handle("/order", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if r.ValidateMethod(req, http.MethodPost) {
+			r.controller.CreateOrder(w, req)
+		} else {
+			w.WriteHeader(404)
+		}
+	}))
 	return router
+}
+
+func (r *Router) ValidateMethod(req *http.Request, method string) bool {
+	return req.Method == method
 }
