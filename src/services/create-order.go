@@ -5,16 +5,15 @@ import (
 	"rabbitmq-golang/src/infra/http/dto"
 )
 
-type OrderServiceAdapter struct{}
+type OrderServiceAdapter struct {
+	RabbitMQ *amqp.RabbitMQ
+}
 
-func (o *OrderServiceAdapter) Execute(message dto.OrderDto) error {
-	rabbitMQ := amqp.RabbitMQ{
-		Uri: "amqp://example:123456@localhost:5672/",
-	}
-	channel := rabbitMQ.OpenChannel()
+func (o *OrderServiceAdapter) CreateOrder(message dto.OrderDto) error {
+	channel := o.RabbitMQ.OpenChannel()
 	defer channel.Close()
 
-	err := rabbitMQ.SendMessage(channel, message, "golang", "")
+	err := o.RabbitMQ.SendMessage(channel, message, "golang", "")
 	if err != nil {
 		return err
 	}

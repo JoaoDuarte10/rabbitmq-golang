@@ -1,4 +1,4 @@
-package order
+package controller
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"rabbitmq-golang/src/infra/http/dto"
 )
 
-func (o *OrderServer) CreateOrder(w http.ResponseWriter, r *http.Request) {
+func (c *ControllerAdapter) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	order := dto.OrderDto{}
 
 	body, _ := io.ReadAll(r.Body)
@@ -19,7 +19,7 @@ func (o *OrderServer) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 	}
 
-	err = o.Service.Execute(order)
+	err = c.Service.CreateOrder(order)
 	if err != nil {
 		log.Print("Erro no service")
 	}

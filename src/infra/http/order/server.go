@@ -4,34 +4,33 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"rabbitmq-golang/src/infra/http/dto"
+	"rabbitmq-golang/src/infra/amqp"
+	"rabbitmq-golang/src/infra/http/order/controller"
 	"rabbitmq-golang/src/services"
 )
 
-type OrderService interface {
-	Execute(message dto.OrderDto) error
-}
-
 type OrderServer struct {
-	Service OrderService
+	Controller controller.Controller
+	Service    services.OrderService
 	http.Handler
 }
 
-func NewOrderServer() *OrderServer {
-	service := services.OrderServiceAdapter{}
-	server := OrderServer{Service: &service}
+func MakeOrderServer() *OrderServer {
+	rabbitMQ := amqp.RabbitMQ{Uri: "amqp://example:123456@localhost:5672/"}
+	service := services.OrderServiceAdapter{RabbitMQ: &rabbitMQ}
+	controller := controller.ControllerAdapter{Service: &service}
 
-	router := http.NewServeMux()
-	router.Handle("/order", http.HandlerFunc(server.CreateOrder))
+	server := &OrderServer{Service: &service, Controller: &controller}
 
-	server.Handler = router
+	router := &Router{controller: server.Controller}
+	server.Handler = router.Init()
 
-	return &server
+	return server
 }
 
 func StartServer() {
 	const PORT = "3000"
-	server := NewOrderServer()
+	server := MakeOrderServer()
 
 	go func() {
 		err := http.ListenAndServe(fmt.Sprintf(":%s", PORT), server)
