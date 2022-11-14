@@ -1,4 +1,4 @@
-package order
+package entity
 
 type OrderDto struct {
 	Id    any     `json:id`

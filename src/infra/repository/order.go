@@ -3,19 +3,19 @@ package repository
 import (
 	"database/sql"
 	"log"
-	"rabbitmq-golang/src/domain/order"
+	"rabbitmq-golang/src/domain/entity"
 )
 
 type OrderRepository interface {
-	Save(order order.OrderDto) error
-	Get() ([]order.OrderDto, error)
+	Save(order entity.OrderDto) error
+	Get() ([]entity.OrderDto, error)
 }
 
 type OrderRepositorySqlite struct {
 	Db *sql.DB
 }
 
-func (o *OrderRepositorySqlite) Save(order order.OrderDto) error {
+func (o *OrderRepositorySqlite) Save(order entity.OrderDto) error {
 	stmt, err := o.Db.Prepare("INSERT INTO orders(name, price, date) VALUES(?, ?, ?)")
 	if err != nil {
 		return err
@@ -29,8 +29,8 @@ func (o *OrderRepositorySqlite) Save(order order.OrderDto) error {
 	return nil
 }
 
-func (o *OrderRepositorySqlite) Get() ([]order.OrderDto, error) {
-	result := []order.OrderDto{}
+func (o *OrderRepositorySqlite) Get() ([]entity.OrderDto, error) {
+	result := []entity.OrderDto{}
 
 	rows, err := o.Db.Query("SELECT * FROM orders")
 	if err != nil {
@@ -39,7 +39,7 @@ func (o *OrderRepositorySqlite) Get() ([]order.OrderDto, error) {
 	}
 
 	for rows.Next() {
-		var order order.OrderDto
+		var order entity.OrderDto
 		if err := rows.Scan(&order.Id, &order.Name, &order.Price, &order.Date); err != nil {
 			log.Printf("Failed to parsed orders: %s", err)
 		}

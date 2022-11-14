@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"rabbitmq-golang/src/application/events"
 	"rabbitmq-golang/src/application/services"
 	"rabbitmq-golang/src/factories"
 	"rabbitmq-golang/src/infra/amqp"
@@ -20,7 +21,7 @@ type OrderServer struct {
 type OrderServiceAdapter struct {
 	*amqp.RabbitMQ
 	*services.OrderCreateService
-	*services.OrderServiceEvent
+	*events.OrderServiceEvent
 	*services.GetOrderService
 }
 
@@ -31,7 +32,7 @@ func MakeOrderServer() *OrderServer {
 	db := factories.MakeConnectionDatabse()
 	repository := &repository.OrderRepositorySqlite{Db: &db}
 
-	orderCreateEvent := services.OrderServiceEvent{RabbitMQ: &rabbitMQ}
+	orderCreateEvent := events.OrderServiceEvent{RabbitMQ: &rabbitMQ}
 	orderCreateService := services.OrderCreateService{Repository: repository}
 	fetchOrders := services.GetOrderService{Repository: repository}
 
