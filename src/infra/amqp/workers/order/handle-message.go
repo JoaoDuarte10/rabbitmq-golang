@@ -2,6 +2,7 @@ package order
 
 import (
 	"encoding/json"
+	"log"
 	"rabbitmq-golang/src/application/services"
 	"rabbitmq-golang/src/domain/entity"
 
@@ -24,5 +25,7 @@ func (h *HandleMessage) Handle(message amqp091.Delivery) error {
 	if err != nil {
 		return err
 	}
+
+	log.Print("[OrderCreateWorker::Handle] Message processed successfully")
 	return nil
 }
