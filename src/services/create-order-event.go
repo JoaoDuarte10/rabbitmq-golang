@@ -13,7 +13,7 @@ func (o *OrderServiceEvent) CreateOrderEvent(message order.OrderDto) error {
 	channel := o.RabbitMQ.OpenChannel()
 	defer channel.Close()
 
-	err := o.RabbitMQ.SendMessage(channel, message, "golang", "")
+	err := o.RabbitMQ.SendMessage(channel, message, "order-create", "order", "order-create")
 	if err != nil {
 		return err
 	}

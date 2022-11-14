@@ -31,13 +31,13 @@ func (r *RabbitMQ) OpenChannel() *amqp.Channel {
 }
 
 func (r *RabbitMQ) Consume(ch *amqp.Channel, out chan amqp.Delivery, queueName string) {
-	_, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
-	failOnError(err, "[RabbitMQ::Consume] Failed to declare a queue")
+	// _, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
+	// failOnError(err, "[RabbitMQ::Consume] Failed to declare a queue")
 
 	messages, err := ch.Consume(
 		queueName,
 		"",
-		true,
+		false,
 		false,
 		false,
 		false,
@@ -50,9 +50,12 @@ func (r *RabbitMQ) Consume(ch *amqp.Channel, out chan amqp.Delivery, queueName s
 	}
 }
 
-func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message any, queueName string, exchange string) error {
-	q, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
-	failOnError(err, "Failed to declare a queue")
+func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message any, queueName string, exchange string, key string) error {
+	// exErr := ch.ExchangeDeclare(exchange, "fanout", true, false, false, false, nil)
+	// failOnError(exErr, "Failed to declare exchange")
+
+	// _, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
+	// failOnError(err, "Failed to declare queue")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -62,7 +65,7 @@ func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message any, queueName string, 
 
 	err = ch.PublishWithContext(ctx,
 		exchange,
-		q.Name,
+		key,
 		false,
 		false,
 		amqp.Publishing{
@@ -70,10 +73,10 @@ func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message any, queueName string, 
 			Body:        body,
 		})
 	if err != nil {
-		failOnError(err, "Failed to publish a message")
+		failOnError(err, "[RabbitMQ::SendMessage] Failed to publish a message")
 		return err
 	}
 
-	log.Printf("Success publish message in queue: %s", queueName)
+	log.Printf("[RabbitMQ::SendMessage] Success publish message in queue: %s", queueName)
 	return nil
 }
