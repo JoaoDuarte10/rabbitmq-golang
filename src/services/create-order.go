@@ -15,7 +15,7 @@ type OrderCreateService struct {
 func (o *OrderCreateService) CreateOrder(order dto.OrderDto) error {
 	err := o.Repository.Save(order)
 	if err != nil {
-		log.Printf("Error in save order: %s", err)
+		log.Printf("[OrderCreateService::CreateOrder] Error in save order: %s", err)
 		return err
 	}
 	return nil

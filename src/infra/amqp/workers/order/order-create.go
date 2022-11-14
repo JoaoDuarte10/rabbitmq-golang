@@ -27,11 +27,14 @@ func (o *OrderCreateWorker) Start(queueName string, maxRetriesConfig int) error 
 	go o.RabbitMQ.Consume(ch, out, queueName)
 
 	for message := range out {
-		log.Print("[OrderCreateWorker::Consume] Process Message...")
+		log.Print("[OrderCreateWorker::Consume] Message Received")
 		err := o.HandleMessage.Handle(message)
 		if err != nil {
 			if CountProcessedMessage(message) >= maxRetriesConfig {
-				log.Printf("[OrderCreateWorker::Consume] This order exceeded %d processing attempts", maxRetriesConfig)
+				log.Printf(
+					"[OrderCreateWorker::Consume] This order exceeded %d processing attempts",
+					maxRetriesConfig,
+				)
 				message.Ack(true)
 			} else {
 				message.Nack(false, false)

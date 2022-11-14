@@ -61,5 +61,5 @@ func StartServer() {
 		}
 	}()
 
-	log.Printf("Server is running on port: %s", PORT)
+	log.Printf("[OrderServer::StartServer] Server is running on port: %s", PORT)
 }
