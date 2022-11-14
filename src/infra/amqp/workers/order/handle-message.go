@@ -2,8 +2,8 @@ package order
 
 import (
 	"encoding/json"
+	"rabbitmq-golang/src/application/services"
 	"rabbitmq-golang/src/domain/order"
-	"rabbitmq-golang/src/services"
 
 	"github.com/rabbitmq/amqp091-go"
 )

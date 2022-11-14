@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"rabbitmq-golang/src/application/services"
 	"rabbitmq-golang/src/factories"
 	"rabbitmq-golang/src/infra/amqp"
 	"rabbitmq-golang/src/infra/http/order/controller"
 	"rabbitmq-golang/src/infra/repository"
-	"rabbitmq-golang/src/services"
 )
 
 type OrderServer struct {
@@ -25,7 +25,9 @@ type OrderServiceAdapter struct {
 }
 
 func MakeOrderServer() *OrderServer {
-	rabbitMQ := amqp.RabbitMQ{Uri: "amqp://example:123456@localhost:5672/"}
+	channel := amqp.OpenChannel("amqp://example:123456@localhost:5672/")
+	defer channel.Close()
+	rabbitMQ := amqp.RabbitMQ{Channel: *channel}
 	db := factories.MakeConnectionDatabse()
 	repository := &repository.OrderRepositorySqlite{Db: &db}
 

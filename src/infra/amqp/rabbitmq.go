@@ -10,18 +10,18 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+type RabbitMQ struct {
+	Channel amqp.Channel
+}
+
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
 	}
 }
 
-type RabbitMQ struct {
-	Uri string
-}
-
-func (r *RabbitMQ) OpenChannel() *amqp.Channel {
-	conn, err := amqp.Dial(r.Uri)
+func OpenChannel(uri string) *amqp.Channel {
+	conn, err := amqp.Dial(uri)
 	failOnError(err, "[RabbitMQ::OpenChannel] Failed to connect to RabbitMQ")
 
 	ch, err := conn.Channel()
@@ -30,11 +30,8 @@ func (r *RabbitMQ) OpenChannel() *amqp.Channel {
 	return ch
 }
 
-func (r *RabbitMQ) Consume(ch *amqp.Channel, out chan amqp.Delivery, queueName string) {
-	// _, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
-	// failOnError(err, "[RabbitMQ::Consume] Failed to declare a queue")
-
-	messages, err := ch.Consume(
+func (r *RabbitMQ) Consume(out chan amqp.Delivery, queueName string) {
+	messages, err := r.Channel.Consume(
 		queueName,
 		"",
 		false,
@@ -50,20 +47,14 @@ func (r *RabbitMQ) Consume(ch *amqp.Channel, out chan amqp.Delivery, queueName s
 	}
 }
 
-func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message any, queueName string, exchange string, key string) error {
-	// exErr := ch.ExchangeDeclare(exchange, "fanout", true, false, false, false, nil)
-	// failOnError(exErr, "Failed to declare exchange")
-
-	// _, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
-	// failOnError(err, "Failed to declare queue")
-
+func (r *RabbitMQ) SendMessage(message any, queueName string, exchange string, key string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	body, err := json.Marshal(message)
 	failOnError(err, fmt.Sprintf("[RabbitMQ::SendMessage] Failed to parsed message in json: %s", message))
 
-	err = ch.PublishWithContext(ctx,
+	err = r.Channel.PublishWithContext(ctx,
 		exchange,
 		key,
 		false,
@@ -78,5 +69,57 @@ func (r *RabbitMQ) SendMessage(ch *amqp.Channel, message any, queueName string, 
 	}
 
 	log.Printf("[RabbitMQ::SendMessage] Success publish message in queue: %s", queueName)
+	return nil
+}
+
+func (r *RabbitMQ) CreateExchange(
+	name string,
+	exchangeType string,
+) error {
+	err := r.Channel.ExchangeDeclare(
+		name,
+		exchangeType,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	failOnError(err, "Failed to declare exchange")
+	return nil
+}
+
+func (r *RabbitMQ) CreateQueue(
+	name string,
+	queueType string,
+	args amqp.Table,
+) error {
+	err := r.Channel.ExchangeDeclare(
+		name,
+		queueType,
+		true,
+		false,
+		false,
+		false,
+		args,
+	)
+	failOnError(err, "Failed to declare exchange")
+	return nil
+}
+
+func (r *RabbitMQ) QueueBind(
+	name string,
+	key string,
+	exchange string,
+	args amqp.Table,
+) error {
+	err := r.Channel.QueueBind(
+		name,
+		key,
+		exchange,
+		false,
+		args,
+	)
+	failOnError(err, "Failed to declare exchange")
 	return nil
 }

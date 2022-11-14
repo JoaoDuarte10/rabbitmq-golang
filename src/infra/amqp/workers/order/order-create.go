@@ -19,12 +19,9 @@ type OrderCreateWorker struct {
 func (o *OrderCreateWorker) Start(queueName string, maxRetriesConfig int) error {
 	log.Print("[OrderCreateWorker::Start] Worker Starting")
 
-	ch := o.RabbitMQ.OpenChannel()
-	defer ch.Close()
-
 	out := make(chan amqp091.Delivery)
 
-	go o.RabbitMQ.Consume(ch, out, queueName)
+	go o.RabbitMQ.Consume(out, queueName)
 
 	for message := range out {
 		log.Print("[OrderCreateWorker::Consume] Message Received")

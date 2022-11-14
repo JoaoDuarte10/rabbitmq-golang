@@ -2,7 +2,7 @@ package controller
 
 import (
 	"net/http"
-	"rabbitmq-golang/src/services"
+	"rabbitmq-golang/src/application/services"
 )
 
 type Controller interface {
