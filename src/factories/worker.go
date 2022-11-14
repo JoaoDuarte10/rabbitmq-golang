@@ -13,7 +13,6 @@ func MakeOrderCreateWorker(qtdWorkers int) {
 	service := services.OrderCreateService{Repository: &repository}
 
 	channel := amqp.OpenChannel("amqp://example:123456@localhost:5672/")
-	defer channel.Close()
 	queueName := "order-create"
 	rabbitMQ := amqp.RabbitMQ{
 		Channel: *channel,
