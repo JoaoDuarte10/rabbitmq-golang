@@ -8,6 +8,9 @@ import (
 func main() {
 	forever := make(chan bool)
 
+	factories.MakeTables()
+	factories.MakeInfraRabbitMQ()
+
 	factories.MakeOrderCreateWorker(1)
 	order.StartServer()
 
