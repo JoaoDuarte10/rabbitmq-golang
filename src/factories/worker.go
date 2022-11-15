@@ -1,6 +1,7 @@
 package factories
 
 import (
+	"os"
 	"rabbitmq-golang/src/application/services"
 	"rabbitmq-golang/src/infra/amqp"
 	"rabbitmq-golang/src/infra/amqp/workers/order"
@@ -9,12 +10,12 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
-func MakeOrderCreateWorker(qtdWorkers int) {
+func MakeOrderCreateWorker(rabbitUri string, qtdWorkers int) {
 	db := MakeConnectionDatabse()
 	repository := repository.OrderRepositorySqlite{Db: &db}
 	service := services.OrderCreateService{Repository: &repository}
 
-	channel := amqp.OpenChannel("amqp://example:123456@rabbitmq:5672/")
+	channel := amqp.OpenChannel(rabbitUri)
 	rabbitMQ := amqp.RabbitMQ{
 		Channel: *channel,
 	}
@@ -30,7 +31,8 @@ func MakeOrderCreateWorker(qtdWorkers int) {
 }
 
 func MakeInfraRabbitMQ() {
-	channel := amqp.OpenChannel("amqp://example:123456@rabbitmq:5672/")
+	rabbitUri := os.Getenv("RABBITMQ_BASE_URI")
+	channel := amqp.OpenChannel(rabbitUri)
 	rabbitMQ := amqp.RabbitMQ{
 		Channel: *channel,
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"rabbitmq-golang/src/application/events"
 	"rabbitmq-golang/src/application/services"
 	"rabbitmq-golang/src/factories"
@@ -25,8 +26,8 @@ type OrderServiceAdapter struct {
 	*services.GetOrderService
 }
 
-func MakeOrderServer() *OrderServer {
-	channel := amqp.OpenChannel("amqp://example:123456@rabbitmq:5672/")
+func MakeOrderServer(rabbitUri string) *OrderServer {
+	channel := amqp.OpenChannel(rabbitUri)
 	rabbitMQ := amqp.RabbitMQ{Channel: *channel}
 	db := factories.MakeConnectionDatabse()
 	repository := &repository.OrderRepositorySqlite{Db: &db}
@@ -54,7 +55,8 @@ func MakeOrderServer() *OrderServer {
 
 func StartServer() {
 	const PORT = "3000"
-	server := MakeOrderServer()
+	rabbitUri := os.Getenv("RABBITMQ_BASE_URI")
+	server := MakeOrderServer(rabbitUri)
 
 	go func() {
 		err := http.ListenAndServe(fmt.Sprintf(":%s", PORT), server)

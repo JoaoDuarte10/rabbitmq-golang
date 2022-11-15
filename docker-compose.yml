@@ -8,6 +8,8 @@ services:
       dockerfile: Dockerfile.dev
     depends_on:
       - rabbitmq
+    environment:
+      RABBITMQ_BASE_URI: ${RABBITMQ_BASE_URI}
     ports:
       - 3000:3000
     volumes:
