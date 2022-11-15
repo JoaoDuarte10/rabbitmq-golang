@@ -48,6 +48,13 @@ go get ./...
 O projeto usa o RabbitMQ, então será necessário que ele esteja rodando na sua máquina. A string de conexão utilizada é: `amqp://example:123456@localhost:5672/`
 
 Mas pode ser alterada nas seguintes funções: `MakeOrderCreateWorker` e `MakeOrderServer`
+
+No arquivo `docker-compose.yml` há um container configurado para o RabbitMQ, e pode ser criado executando o seguinte comando:
+
+```bash
+docker-compose up -d
+```
+
 <br/>
 
 ### Para inicializar a aplicação, execute o seguinte comando:
