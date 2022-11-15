@@ -1,3 +1,5 @@
 .env
 order.db
 tables/
+
+.data/

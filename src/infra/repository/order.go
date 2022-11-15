@@ -25,7 +25,6 @@ func (o *OrderRepositorySqlite) Save(order entity.OrderDto) error {
 		return err
 	}
 
-	defer o.Db.Close()
 	return nil
 }
 
@@ -45,8 +44,6 @@ func (o *OrderRepositorySqlite) Get() ([]entity.OrderDto, error) {
 		}
 		result = append(result, order)
 	}
-
-	defer o.Db.Close()
 
 	return result, nil
 }

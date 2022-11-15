@@ -85,25 +85,24 @@ func (r *RabbitMQ) CreateExchange(
 		false,
 		nil,
 	)
-	failOnError(err, "Failed to declare exchange")
+	failOnError(err, "[RabbitMQ::CreateExchange] Failed to declare exchange")
 	return nil
 }
 
 func (r *RabbitMQ) CreateQueue(
 	name string,
-	queueType string,
+	durable bool,
 	args amqp.Table,
 ) error {
-	err := r.Channel.ExchangeDeclare(
+	_, err := r.Channel.QueueDeclare(
 		name,
-		queueType,
-		true,
+		durable,
 		false,
 		false,
 		false,
 		args,
 	)
-	failOnError(err, "Failed to declare exchange")
+	failOnError(err, "[RabbitMQ::CreateQueue] Failed to declare exchange")
 	return nil
 }
 
@@ -120,6 +119,6 @@ func (r *RabbitMQ) QueueBind(
 		false,
 		args,
 	)
-	failOnError(err, "Failed to declare exchange")
+	failOnError(err, "[RabbitMQ::QueueBind] Failed to declare exchange")
 	return nil
 }

@@ -10,7 +10,7 @@ type OrderServiceEvent struct {
 }
 
 func (o *OrderServiceEvent) CreateOrderEvent(message entity.OrderDto) error {
-	err := o.RabbitMQ.SendMessage(message, "order-create", "order", "order-create")
+	err := o.RabbitMQ.SendMessage(message, "create-order", "order", "order-create")
 	if err != nil {
 		return err
 	}

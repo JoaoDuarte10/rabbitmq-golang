@@ -1,0 +1,10 @@
+FROM golang:1.19 AS build
+WORKDIR /app/rabbitmq-golang
+COPY . /app/rabbitmq-golang
+RUN CGO_ENABLED=0 GOOS=linux go build -o server src/main.go
+
+FROM scratch
+WORKDIR /app/rabbitmq-golang
+COPY --from=build /app/rabbitmq-golang/server ./
+EXPOSE 3000
+CMD [ "./server" ]

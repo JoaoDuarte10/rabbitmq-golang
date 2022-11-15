@@ -26,7 +26,7 @@ type OrderServiceAdapter struct {
 }
 
 func MakeOrderServer() *OrderServer {
-	channel := amqp.OpenChannel("amqp://example:123456@localhost:5672/")
+	channel := amqp.OpenChannel("amqp://example:123456@rabbitmq:5672/")
 	rabbitMQ := amqp.RabbitMQ{Channel: *channel}
 	db := factories.MakeConnectionDatabse()
 	repository := &repository.OrderRepositorySqlite{Db: &db}
