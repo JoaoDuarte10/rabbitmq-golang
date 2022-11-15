@@ -8,6 +8,8 @@ import (
 func (c *ControllerAdapter) FetchOrders(w http.ResponseWriter, r *http.Request) {
 	orders := c.Service.GetOrders()
 
-	json.NewEncoder(w).Encode(orders)
-	w.WriteHeader(http.StatusOK)
+	err := json.NewEncoder(w).Encode(orders)
+	if err != nil {
+		w.WriteHeader(500)
+	}
 }
