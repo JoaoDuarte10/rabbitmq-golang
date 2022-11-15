@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"rabbitmq-golang/src/application/services"
+	"rabbitmq-golang/src/infra/logger"
 )
 
 type Controller interface {
@@ -12,4 +13,5 @@ type Controller interface {
 
 type ControllerAdapter struct {
 	Service services.OrderService
+	Logger  logger.Logger
 }

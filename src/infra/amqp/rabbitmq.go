@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"rabbitmq-golang/src/infra/logger"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -12,11 +12,15 @@ import (
 
 type RabbitMQ struct {
 	Channel amqp.Channel
+	Logger  logger.Logger
 }
 
 func failOnError(err error, msg string) {
+	logger := &logger.LoggerAdapter{ConsoleEnable: false}
+
 	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
+		logger.Error(fmt.Sprintf("%s: %s", msg, err))
+		return
 	}
 }
 
@@ -68,7 +72,7 @@ func (r *RabbitMQ) SendMessage(message any, queueName string, exchange string, k
 		return err
 	}
 
-	log.Printf("[RabbitMQ::SendMessage] Success publish message in queue: %s", queueName)
+	r.Logger.Info(fmt.Sprintf("[RabbitMQ::SendMessage] Success publish message in queue: %s", queueName))
 	return nil
 }
 

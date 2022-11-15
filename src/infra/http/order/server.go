@@ -10,6 +10,7 @@ import (
 	"rabbitmq-golang/src/factories"
 	"rabbitmq-golang/src/infra/amqp"
 	"rabbitmq-golang/src/infra/http/order/controller"
+	"rabbitmq-golang/src/infra/logger"
 	"rabbitmq-golang/src/infra/repository"
 )
 
@@ -32,8 +33,10 @@ func MakeOrderServer(rabbitUri string) *OrderServer {
 	db := factories.MakeConnectionDatabse()
 	repository := &repository.OrderRepositorySqlite{Db: &db}
 
+	logger := &logger.LoggerAdapter{ConsoleEnable: false}
+
 	orderCreateEvent := events.OrderServiceEvent{RabbitMQ: &rabbitMQ}
-	orderCreateService := services.OrderCreateService{Repository: repository}
+	orderCreateService := services.OrderCreateService{Repository: repository, Logger: logger}
 	fetchOrders := services.GetOrderService{Repository: repository}
 
 	service := OrderServiceAdapter{
@@ -43,7 +46,7 @@ func MakeOrderServer(rabbitUri string) *OrderServer {
 		GetOrderService:    &fetchOrders,
 	}
 
-	controller := controller.ControllerAdapter{Service: &service}
+	controller := controller.ControllerAdapter{Service: &service, Logger: logger}
 
 	server := &OrderServer{Service: &service, Controller: &controller}
 
@@ -61,9 +64,11 @@ func StartServer() {
 	go func() {
 		err := http.ListenAndServe(fmt.Sprintf(":%s", PORT), server)
 		if err != nil {
-			log.Fatalf("Failed to start server. Error: %s", err)
+			log.Fatalf("[StartServer] Failed to start server. Error: %s", err)
 		}
 	}()
 
-	log.Printf("[OrderServer::StartServer] Server is running on port: %s", PORT)
+	logger := &logger.LoggerAdapter{ConsoleEnable: false}
+
+	logger.Info(fmt.Sprintf("[OrderServer::StartServer] Server is running on port: %s", PORT))
 }

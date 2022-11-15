@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"rabbitmq-golang/src/domain/entity"
 )
@@ -15,13 +14,14 @@ func (c *ControllerAdapter) CreateOrder(w http.ResponseWriter, r *http.Request) 
 
 	err := json.Unmarshal(body, &order)
 	if err != nil {
-		log.Print("Failed to convert body in json")
+		c.Logger.Error("[ControllerAdapter::CreateOrder] Failed to convert body in json")
 		w.WriteHeader(400)
 	}
 
 	err = c.Service.CreateOrderEvent(order)
 	if err != nil {
-		log.Print("Erro no service")
+		c.Logger.Error("[ControllerAdapter::CreateOrder] Failed to dispath order event")
+		w.WriteHeader(500)
 	}
 
 	w.WriteHeader(201)

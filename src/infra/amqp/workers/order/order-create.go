@@ -1,9 +1,10 @@
 package order
 
 import (
-	"log"
+	"fmt"
 	"rabbitmq-golang/src/infra/amqp"
 	"rabbitmq-golang/src/infra/amqp/workers"
+	"rabbitmq-golang/src/infra/logger"
 
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -11,25 +12,26 @@ import (
 type OrderCreateWorker struct {
 	RabbitMQ amqp.RabbitMQ
 	workers.HandleMessage
+	Logger logger.Logger
 }
 
 func (o *OrderCreateWorker) Start(queueName string, maxRetriesConfig int) error {
-	log.Print("[OrderCreateWorker::Start] Worker Starting")
+	o.Logger.Info("[OrderCreateWorker::Start] Worker Starting")
 
 	out := make(chan amqp091.Delivery)
 
 	go o.RabbitMQ.Consume(out, queueName)
 
 	for message := range out {
-		log.Print("[OrderCreateWorker::Consume] Message Received")
+		o.Logger.Info("[OrderCreateWorker::Consume] Message Received")
 
 		err := o.HandleMessage.Handle(message)
 		if err != nil {
 			if workers.CountProcessedMessage(message) >= maxRetriesConfig {
-				log.Printf(
+				o.Logger.Error(fmt.Sprintf(
 					"[OrderCreateWorker::Consume] This order exceeded %d processing attempts",
 					maxRetriesConfig,
-				)
+				))
 				message.Ack(true)
 			} else {
 				message.Nack(false, false)

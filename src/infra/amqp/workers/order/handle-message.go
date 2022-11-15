@@ -2,15 +2,16 @@ package order
 
 import (
 	"encoding/json"
-	"log"
 	"rabbitmq-golang/src/application/services"
 	"rabbitmq-golang/src/domain/entity"
+	"rabbitmq-golang/src/infra/logger"
 
 	"github.com/rabbitmq/amqp091-go"
 )
 
 type HandleMessage struct {
 	Service services.OrderCreateService
+	Logger  logger.Logger
 }
 
 func (h *HandleMessage) Handle(message amqp091.Delivery) error {
@@ -26,6 +27,6 @@ func (h *HandleMessage) Handle(message amqp091.Delivery) error {
 		return err
 	}
 
-	log.Print("[OrderCreateWorker::Handle] Message processed successfully")
+	h.Logger.Info("[OrderCreateWorker::Handle] Message processed successfully")
 	return nil
 }

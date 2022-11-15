@@ -5,6 +5,7 @@ import (
 	"rabbitmq-golang/src/application/services"
 	"rabbitmq-golang/src/infra/amqp"
 	"rabbitmq-golang/src/infra/amqp/workers/order"
+	"rabbitmq-golang/src/infra/logger"
 	"rabbitmq-golang/src/infra/repository"
 
 	"github.com/rabbitmq/amqp091-go"
@@ -20,9 +21,11 @@ func MakeOrderCreateWorker(rabbitUri string, qtdWorkers int) {
 		Channel: *channel,
 	}
 
-	handler := order.HandleMessage{Service: service}
+	logger := &logger.LoggerAdapter{ConsoleEnable: false}
 
-	worker := &order.OrderCreateWorker{RabbitMQ: rabbitMQ, HandleMessage: &handler}
+	handler := order.HandleMessage{Service: service, Logger: logger}
+
+	worker := &order.OrderCreateWorker{RabbitMQ: rabbitMQ, HandleMessage: &handler, Logger: logger}
 
 	queueName := "create-order"
 	for i := 1; i <= qtdWorkers; i++ {
