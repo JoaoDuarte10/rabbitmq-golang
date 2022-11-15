@@ -3,4 +3,5 @@ order.db
 tables/
 
 .data/
+data/
 app.log
