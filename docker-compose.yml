@@ -54,6 +54,7 @@ services:
     user: "$UID:$GID"
     volumes:
       - ./data/grafana:/var/lib/grafana
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources
     ports:
       - "3333:3000"
     depends_on:
