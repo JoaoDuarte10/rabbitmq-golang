@@ -14,42 +14,31 @@ Para especificar a quantidade de Workers, basta alterar o parâmetro da função
 
 ---
 
-## Banco de Dados
+## Tecnologias Utilizadas
 
-Para armazenar os pedidos criados, foi utilizado o [Sqlite3](https://www.sqlite.org/index.html) por ser um banco de dados mais simples e fácil de ser configurado.
+- Conteinerização:
+  - [Docker](https://www.docker.com)
+- Linguagem:
+  - [Golang](https://go.dev)
+- Banco de dados:
+  - [Sqlite3](https://www.sqlite.org/index.html)
+- Mensageria:
+  - [RabbitMQ](https://www.rabbitmq.com)
+- Logs:
+  - [Grafana Loki](https://grafana.com/oss/loki/)
+- Dashboards:
+  - [Grafana](https://grafana.com)
 
-Será necessário criar um arquivo `order.db` na raiz no projeto e criar a tabela `orders` para que seja possível armazenar os dados. Segue o script sql para a criação da mesma:
-
-```sql
-CREATE TABLE orders (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    price INTEGER NOT NULL,
-    date DATETIME DEFAULT CURRENT_TIMESTAMP
-)
-```
-
----
-
-## Instalando as dependências
-
-Observação: é necessário ter o Go instalado na máquina.
-
-Para instalar as dependências do projeto, execute o seguinte comando:
-
-```bash
-go get ./...
-```
 
 ---
 
 ## Inicializando a aplicação
 
-O projeto usa o RabbitMQ, então será necessário que ele esteja rodando na sua máquina. A string de conexão utilizada é: `amqp://example:123456@localhost:5672/`
+Este projeto utiliza o Docker, então toda a infraestrutura necessária será criada no momento em que os containeres forem iniciados.
 
-Mas pode ser alterada nas seguintes funções: `MakeOrderCreateWorker` e `MakeOrderServer`
+### Obervação: É necessário ter o Docker instalado na máquina.
 
-No arquivo `docker-compose.yml` há um container configurado para o RabbitMQ, e pode ser criado executando o seguinte comando:
+Para criar os containeres, execute o seguinte comando:
 
 ```bash
 docker-compose up -d
@@ -57,14 +46,11 @@ docker-compose up -d
 
 <br/>
 
-### Para inicializar a aplicação, execute o seguinte comando:
+A aplicação principal será inicializada na porta `3000`
 
-```bash
-go run src/main.go
-```
+Para acessar o Grafana, acesse: `http://localhost:3333`
 
-A aplicação será inicializada na porta `3000`
-
+---
 
 ## Rotas
 
@@ -98,9 +84,3 @@ curl --request GET \
   --url http://localhost:3000/orders \
   --header 'Content-Type: application/json'
 ```
-
----
-
-## Projeto em desenvolvimento!
-
-Este projeto ainda está em fase de desenvolvimento e serão feitas melhorias no algoritmo, além da criação de testes de unidade e melhorias na configuração das variáveis de ambiente e banco de dados. Também será feita a conteinerização da aplicação.
