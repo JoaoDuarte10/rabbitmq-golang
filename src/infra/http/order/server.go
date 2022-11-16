@@ -29,28 +29,25 @@ type OrderServiceAdapter struct {
 
 func MakeOrderServer(rabbitUri string) *OrderServer {
 	channel := amqp.OpenChannel(rabbitUri)
-	rabbitMQ := amqp.RabbitMQ{Channel: *channel}
 	db := factories.MakeConnectionDatabse()
-	repository := &repository.OrderRepositorySqlite{Db: &db}
 
 	logger := &logger.LoggerAdapter{ConsoleEnable: false}
+	rabbitMQ := amqp.RabbitMQ{Channel: *channel, Logger: logger}
+	repository := &repository.OrderRepositorySqlite{Db: &db}
 
 	orderCreateEvent := events.OrderServiceEvent{RabbitMQ: &rabbitMQ}
 	orderCreateService := services.OrderCreateService{Repository: repository, Logger: logger}
 	fetchOrders := services.GetOrderService{Repository: repository}
-
 	service := OrderServiceAdapter{
 		RabbitMQ:           &rabbitMQ,
 		OrderCreateService: &orderCreateService,
 		OrderServiceEvent:  &orderCreateEvent,
 		GetOrderService:    &fetchOrders,
 	}
-
 	controller := controller.ControllerAdapter{Service: &service, Logger: logger}
-
 	server := &OrderServer{Service: &service, Controller: &controller}
-
 	router := &Router{controller: server.Controller}
+
 	server.Handler = router.Init()
 
 	return server

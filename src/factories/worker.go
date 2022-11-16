@@ -13,15 +13,15 @@ import (
 
 func MakeOrderCreateWorker(rabbitUri string, qtdWorkers int) {
 	db := MakeConnectionDatabse()
+	logger := &logger.LoggerAdapter{ConsoleEnable: false}
 	repository := repository.OrderRepositorySqlite{Db: &db}
-	service := services.OrderCreateService{Repository: &repository}
+	service := services.OrderCreateService{Repository: &repository, Logger: logger}
 
 	channel := amqp.OpenChannel(rabbitUri)
 	rabbitMQ := amqp.RabbitMQ{
 		Channel: *channel,
+		Logger:  logger,
 	}
-
-	logger := &logger.LoggerAdapter{ConsoleEnable: false}
 
 	handler := order.HandleMessage{Service: service, Logger: logger}
 
@@ -54,9 +54,8 @@ func MakeInfraRabbitMQ() {
 		"create-order",
 		true,
 		amqp091.Table{
-			"x-dead-letter-exchange":    "order",
+			"x-dead-letter-exchange":    "order-dlx",
 			"x-dead-letter-routing-key": "order-create",
-			"x-message-ttl":             5000,
 		},
 	)
 
@@ -64,27 +63,29 @@ func MakeInfraRabbitMQ() {
 		"create-order-dlq",
 		true,
 		amqp091.Table{
-			"x-dead-letter-exchange":    "order-dlx",
+			"x-dead-letter-exchange":    "order",
 			"x-dead-letter-routing-key": "order-create",
-			"x-message-ttl":             5000,
+			"x-message-ttl":             10000,
 		},
 	)
 
 	rabbitMQ.QueueBind(
 		"create-order",
 		"order-create",
-		"order-dlx",
+		"order",
 		amqp091.Table{
-			"x-dead-letter-exchange": "order-dlx",
+			"x-dead-letter-exchange":    "order-dlx",
+			"x-dead-letter-routing-key": "order-create",
 		},
 	)
 
 	rabbitMQ.QueueBind(
 		"create-order-dlq",
 		"order-create",
-		"order",
+		"order-dlx",
 		amqp091.Table{
-			"x-dead-letter-exchange": "order",
+			"x-dead-letter-exchange":    "order",
+			"x-dead-letter-routing-key": "order-create",
 		},
 	)
 }
