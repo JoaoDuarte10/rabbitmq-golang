@@ -5,3 +5,5 @@ tables/
 .data/
 data/
 app.log
+
+server

@@ -2,4 +2,6 @@ order.db
 .env
 .gitignore
 test/
-.data/
+data/
+app.log
+Dockerfile.dev
