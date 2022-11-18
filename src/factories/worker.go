@@ -13,19 +13,19 @@ import (
 
 func MakeOrderCreateWorker(rabbitUri string, qtdWorkers int) {
 	db := MakeConnectionDatabse()
-	logger := &logger.LoggerAdapter{ConsoleEnable: false}
+	logger := logger.LoggerAdapter{ConsoleEnable: false}
 	repository := repository.OrderRepositorySqlite{Db: &db}
-	service := services.OrderCreateService{Repository: &repository, Logger: logger}
+	service := services.OrderCreateService{Repository: &repository, Logger: &logger}
 
 	channel := amqp.OpenChannel(rabbitUri)
 	rabbitMQ := amqp.RabbitMQ{
 		Channel: *channel,
-		Logger:  logger,
+		Logger:  &logger,
 	}
 
-	handler := order.HandleMessage{Service: service, Logger: logger}
+	handler := order.HandleMessage{Service: service, Logger: &logger}
 
-	worker := &order.OrderCreateWorker{RabbitMQ: rabbitMQ, HandleMessage: &handler, Logger: logger}
+	worker := &order.OrderCreateWorker{RabbitMQ: rabbitMQ, HandleMessage: &handler, Logger: &logger}
 
 	queueName := "create-order"
 	for i := 1; i <= qtdWorkers; i++ {
@@ -34,10 +34,13 @@ func MakeOrderCreateWorker(rabbitUri string, qtdWorkers int) {
 }
 
 func MakeInfraRabbitMQ() {
+	logger := logger.LoggerAdapter{ConsoleEnable: false}
+
 	rabbitUri := os.Getenv("RABBITMQ_BASE_URI")
 	channel := amqp.OpenChannel(rabbitUri)
 	rabbitMQ := amqp.RabbitMQ{
 		Channel: *channel,
+		Logger:  &logger,
 	}
 
 	rabbitMQ.CreateExchange(
