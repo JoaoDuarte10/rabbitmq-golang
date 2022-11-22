@@ -43,52 +43,60 @@ func MakeInfraRabbitMQ() {
 		Logger:  &logger,
 	}
 
+	exchange := "order"
+	exchangeDlx := "order-dlx"
+	routingKey := "order-create"
+	queue := "order-create"
+	queueDlq := "order-create-dlq"
+	dlx := "x-dead-letter-exchange"
+	dlRoutingKey := "x-dead-letter-routing-key"
+
 	rabbitMQ.CreateExchange(
-		"order",
+		exchange,
 		"fanout",
 	)
 
 	rabbitMQ.CreateExchange(
-		"order-dlx",
+		exchangeDlx,
 		"fanout",
 	)
 
 	rabbitMQ.CreateQueue(
-		"create-order",
+		queue,
 		true,
 		amqp091.Table{
-			"x-dead-letter-exchange":    "order-dlx",
-			"x-dead-letter-routing-key": "order-create",
+			dlx:          exchangeDlx,
+			dlRoutingKey: routingKey,
 		},
 	)
 
 	rabbitMQ.CreateQueue(
-		"create-order-dlq",
+		queueDlq,
 		true,
 		amqp091.Table{
-			"x-dead-letter-exchange":    "order",
-			"x-dead-letter-routing-key": "order-create",
-			"x-message-ttl":             10000,
+			dlx:             exchange,
+			dlRoutingKey:    routingKey,
+			"x-message-ttl": 10000,
 		},
 	)
 
 	rabbitMQ.QueueBind(
-		"create-order",
-		"order-create",
-		"order",
+		queue,
+		routingKey,
+		exchange,
 		amqp091.Table{
-			"x-dead-letter-exchange":    "order-dlx",
-			"x-dead-letter-routing-key": "order-create",
+			dlx:          exchangeDlx,
+			dlRoutingKey: routingKey,
 		},
 	)
 
 	rabbitMQ.QueueBind(
-		"create-order-dlq",
-		"order-create",
-		"order-dlx",
+		queueDlq,
+		routingKey,
+		exchangeDlx,
 		amqp091.Table{
-			"x-dead-letter-exchange":    "order",
-			"x-dead-letter-routing-key": "order-create",
+			dlx:          exchange,
+			dlRoutingKey: routingKey,
 		},
 	)
 }
